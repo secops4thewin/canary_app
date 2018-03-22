@@ -1,0 +1,7 @@
+<nav search_view="search" color="#59db8a">
+  <view name="canary_overview" default="true"/>
+  <view name="incident_investigator" />
+    <view name="search"/>
+  <view name="troubleshooting"/>
+    <view name="dashboards"/>
+</nav>

@@ -1,0 +1,55 @@
+<form>
+  <label>Troubleshooting</label>
+  <description>This page shows details about the python code that communicates with the Canary API.  Change the log level in the Thinkst Canary AddOn for Splunk</description>
+  <fieldset submitButton="true">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="log_level" searchWhenChanged="false">
+      <label>Log Level</label>
+      <choice value="*">ALL</choice>
+      <choice value="INFO">INFO</choice>
+      <choice value="WARN">WARN</choice>
+      <choice value="ERROR">ERROR</choice>
+      <choice value="CRITICAL">CRITICAL</choice>
+      <choice value="DEBUG">DEBUG</choice>
+      <default>*</default>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <valuePrefix>log_level=</valuePrefix>
+      <delimiter> OR </delimiter>
+    </input>
+    <input type="text" token="message">
+      <label>Message Search</label>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Log Information</title>
+      <table>
+        <search>
+          <query>index=_internal $log_level$ sourcetype="ta:canary:log" message=$message$| table _time,log_level, file, message</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="log_level">
+          <colorPalette type="map">{"DEBUG":#3863A0,"INFO":#65A637,"WARN":#ED8440,"ERROR":#D93F3C}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+</form>

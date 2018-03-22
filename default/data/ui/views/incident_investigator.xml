@@ -1,0 +1,171 @@
+<form>
+  <search id="baseSearch">
+    <query>
+      `canary_tools_index` sourcetype=canarytools:incidents id=$incident_id$ | head 1 | stats values
+    </query>
+  </search>
+  <label>Incident Investigator</label>
+  <fieldset submitButton="true">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="incident_id" searchWhenChanged="true">
+      <label>Incident ID</label>
+      <fieldForLabel>id</fieldForLabel>
+      <fieldForValue>id</fieldForValue>
+      <search>
+        <query>() sourcetype="canarytools:incidents"  | stats values(id) as id| mvexpand id</query>
+        <earliest>-30d@d</earliest>
+        <latest>now</latest>
+      </search>
+      <prefix>"</prefix>
+      <suffix>"</suffix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Incident Name</title>
+      <single>
+        <search>
+          <query>| makeresults count=1 | eval id=$incident_id$</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Incident Acknowledged</title>
+      <single>
+        <search base="baseSearch">
+          <query>rename values(description.acknowledged) as Acknowledged | table Acknowledged |  eval range=if(Acknowledged=="False", "severe", "low")</query>
+          <progress>
+            <set token="show_close_ticket">true</set>
+          </progress>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">0</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Days Since Incident Last Updated</title>
+      <single>
+        <search base="baseSearch">
+          <query>rename values(updated) as updated, values(description.acknowledged) as acknowledged, values(description.created) as created 
+| eval na_epoch=strptime(updated,"%a, %d %b %Y %T %Z"),na_epoch=(now()-na_epoch)/60/60/24, na_epoch=round(na_epoch,2), a_epoch=(now()-created)/60/60/24, a_epoch=round(a_epoch,2), "TimeSinceChange"=if(acknowledged="False",na_epoch,"Good")
+| fields TimeSinceChange</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0.00</option>
+        <option name="rangeColors">["0x65a637","0xf58f39","0xd93f3c"]</option>
+        <option name="rangeValues">[7,20]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Date Incident was created</title>
+      <single>
+        <search base="baseSearch">
+          <query>rename values(description.created) as created | eval "Incident Created"=strftime(created,"%c. %Z") | table "Incident Created"</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Incident Type</title>
+      <single>
+        <search base="baseSearch">
+          <query>table values(category) | rename values(category) as Reason</query>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Geographical Data</title>
+      <table>
+        <search base="baseSearch">
+          <query>fields *geoip* | rename values(description.events{}.geoip.*) as * | transpose | rename column as "Geo Data", "row 1" as "Values"</query>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Event Details</title>
+      <table>
+        <search base="baseSearch">
+          <query>| rename values(description.events{}.*) as * | fields - values(* | transpose|rename column as "Event Data", "row 1" as "Values"</query>
+        </search>
+        <option name="count">100</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Event Location</title>
+      <map>
+        <search base="baseSearch">
+          <query>| fields *geoip* | rename values(description.events{}.geoip.*) as * | geostats count latfield=latitude longfield=longitude</query>
+          <finalized>
+            <condition match="'job.resultCount' != 0">
+              <set token="lat">$result.latitude$</set>
+              <set token="lon">$result.longitude$</set>
+            </condition>
+          </finalized>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.map.center">($lat$,$lon$)</option>
+        <option name="mapping.map.zoom">4</option>
+        <option name="mapping.tileLayer.url">https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png</option>
+        <option name="mapping.type">marker</option>
+      </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Close Incident</title>
+      <single>
+        <search>
+          <query>| makeresults count=1 | eval action="Click to close incident" |  eval severity=case(action="Click to close incident", 1) | rangemap field=severity low=0-4 elevated=4-6 default=severe</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x59db8a","0x59db8a"]</option>
+        <option name="rangeValues">[100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">0</option>
+        <drilldown>
+          <link target="_blank">search?q=| makeresults count=1 | eval id=$incident_id$ | sendalert canary_acknowledge_incident param.incident_id=id param.index_name="main"&amp;earliest=-24h@h&amp;latest=now</link>
+        </drilldown>
+      </single>
+    </panel>
+  </row>
+</form>
