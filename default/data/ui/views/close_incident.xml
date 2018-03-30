@@ -1,0 +1,28 @@
+<form>
+  <label>Close Incident</label>
+  <fieldset submitButton="true">
+    <input type="dropdown" token="incident_id" searchWhenChanged="false">
+      <label>Incident to Close</label>
+      <fieldForLabel>id</fieldForLabel>
+      <fieldForValue>id</fieldForValue>
+      <search>
+        <query>`canary_tools_index` sourcetype="canarytools:incidents"  | stats values(id) as id| mvexpand id</query>
+        <earliest>-30d@d</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>| makeresults count=1 | eval id=$incident_id$| sendalert canary_acknowledge_incident param.incident_id=$incident_id$ param.index_name="main"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

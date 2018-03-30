@@ -1,8 +1,29 @@
 <form>
   <search id="baseSearch">
     <query>
-      `canary_tools_index` sourcetype=canarytools:incidents id=$incident_id$ | head 1 | stats values
+      `canary_tools_index` sourcetype=canarytools:incidents id=$incident_id$ | head 1 | stats values | rename values(description.node_id) as node_id
     </query>
+    <finalized>
+      <condition match=" 'job.resultCount' != 0">
+        <set token="node_id">$result.node_id$</set>
+      </condition>
+      <condition>
+        <set token="node_id">No result found</set>
+      </condition>
+    </finalized>
+  </search>
+  <search id="acknowledgedIncident">
+    <query>
+       `canary_tools_index` sourcetype=canarytools:incidents id=$incident_id$ | head 1 | table description.acknowledged | search description.acknowledged=False
+    </query>
+    <done>
+      <condition match="'job.resultCount' &gt; 0">
+        <set token="search_results"></set>
+      </condition>
+      <condition>
+        <unset token="search_results"></unset>
+      </condition>
+    </done>
   </search>
   <label>Incident Investigator</label>
   <fieldset submitButton="true">
@@ -18,16 +39,31 @@
       <fieldForLabel>id</fieldForLabel>
       <fieldForValue>id</fieldForValue>
       <search>
-        <query>() sourcetype="canarytools:incidents"  | stats values(id) as id| mvexpand id</query>
+        <query>`canary_tools_index` sourcetype="canarytools:incidents"  | stats values(id) as id| mvexpand id</query>
         <earliest>-30d@d</earliest>
         <latest>now</latest>
       </search>
       <prefix>"</prefix>
       <suffix>"</suffix>
     </input>
+    <input type="radio" token="showIncidentName" searchWhenChanged="true">
+      <label>Show Incident Name</label>
+      <choice value="false">Off</choice>
+      <choice value="true">On</choice>
+      <default>false</default>
+      <initialValue>false</initialValue>
+      <change>
+        <condition value="true">
+          <set token="showIncidentName">true</set>
+        </condition>
+        <condition>
+          <unset token="showIncidentName"></unset>
+        </condition>
+      </change>
+    </input>
   </fieldset>
   <row>
-    <panel>
+    <panel depends="$showIncidentName$">
       <title>Incident Name</title>
       <single>
         <search>
@@ -46,9 +82,6 @@
       <single>
         <search base="baseSearch">
           <query>rename values(description.acknowledged) as Acknowledged | table Acknowledged |  eval range=if(Acknowledged=="False", "severe", "low")</query>
-          <progress>
-            <set token="show_close_ticket">true</set>
-          </progress>
         </search>
         <option name="colorMode">block</option>
         <option name="drilldown">all</option>
@@ -86,21 +119,44 @@
   </row>
   <row>
     <panel>
+      <title>Device ID</title>
+      <event>
+        <search>
+          <query>`canary_tools_index` (sourcetype=canarytools:devices id=$node_id$) OR (sourcetype="canarytools:tokens" canarytoken=$node_id$) | head 1</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="list.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </event>
+    </panel>
+    <panel>
       <title>Incident Type</title>
       <single>
         <search base="baseSearch">
           <query>table values(category) | rename values(category) as Reason</query>
         </search>
         <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
       </single>
     </panel>
   </row>
   <row>
-    <panel>
+    <panel depends="$fill1$">
       <title>Geographical Data</title>
       <table>
         <search base="baseSearch">
-          <query>fields *geoip* | rename values(description.events{}.geoip.*) as * | transpose | rename column as "Geo Data", "row 1" as "Values"</query>
+          <query>fields *geoip* | rename values(description.events{}.geoip.* as *| rename "*)" as * | transpose | rename column as "Geo Data", "row 1" as "Values"</query>
+          <progress>
+            <condition match="$job.resultCount$ &gt; 0">
+              <set token="fill1">true</set>
+              <unset token="result1"></unset>
+            </condition>
+            <condition>
+              <set token="result1">true</set>
+              <unset token="fill1"></unset>
+            </condition>
+          </progress>
         </search>
         <option name="count">20</option>
         <option name="dataOverlayMode">none</option>
@@ -114,24 +170,37 @@
     </panel>
   </row>
   <row>
-    <panel>
+    <panel depends="$fill2$">
       <title>Event Details</title>
       <table>
         <search base="baseSearch">
-          <query>| rename values(description.events{}.*) as * | fields - values(* | transpose|rename column as "Event Data", "row 1" as "Values"</query>
+          <query>rename values(description.events{}.*) as * | rename values(description.* as * | rename "*)" as *| fields - values(* | transpose|rename column as "Event Data", "row 1" as "Values"</query>
         </search>
         <option name="count">100</option>
-        <option name="drilldown">none</option>
+        <option name="drilldown">cell</option>
         <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <link target="_blank">search?q=`canary_tools_index` sourcetype=canarytools:incidents $click.value2$&amp;earliest=$field1.earliest$&amp;latest=$field1.latest$</link>
+        </drilldown>
       </table>
     </panel>
   </row>
   <row>
-    <panel>
+    <panel depends="$fill3$">
       <title>Event Location</title>
       <map>
         <search base="baseSearch">
           <query>| fields *geoip* | rename values(description.events{}.geoip.*) as * | geostats count latfield=latitude longfield=longitude</query>
+          <progress>
+            <condition match="$job.resultCount$ &gt; 0">
+              <set token="fill3">true</set>
+              <unset token="result3"></unset>
+            </condition>
+            <condition>
+              <set token="result3">true</set>
+              <unset token="fill3"></unset>
+            </condition>
+          </progress>
           <finalized>
             <condition match="'job.resultCount' != 0">
               <set token="lat">$result.latitude$</set>
@@ -148,7 +217,7 @@
     </panel>
   </row>
   <row>
-    <panel>
+    <panel depends="$search_results$">
       <title>Close Incident</title>
       <single>
         <search>
@@ -163,7 +232,7 @@
         <option name="refresh.display">progressbar</option>
         <option name="useColors">0</option>
         <drilldown>
-          <link target="_blank">search?q=| makeresults count=1 | eval id=$incident_id$ | sendalert canary_acknowledge_incident param.incident_id=id param.index_name="main"&amp;earliest=-24h@h&amp;latest=now</link>
+          <link target="_blank">/app/canary_app/close_incident?form.incident_id=$incident_id$</link>
         </drilldown>
       </single>
     </panel>

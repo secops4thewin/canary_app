@@ -41,10 +41,10 @@
   </row>
   <row>
     <panel>
-      <title>Total Incidents</title>
+      <title>Unacknowledged Incidents</title>
       <single>
         <search>
-          <query>`canary_tools_index` sourcetype="canarytools:incidents" | stats dc(id) as "Total Incidents"</query>
+          <query>`canary_tools_index` sourcetype="canarytools:incidents" "description.acknowledged"=False | stats dc(id) as "Unacknowledged Incidents"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -54,10 +54,10 @@
       </single>
     </panel>
     <panel>
-      <title>Total Devices</title>
+      <title>Live Canaries</title>
       <single>
         <search>
-          <query>`canary_tools_index` sourcetype="canarytools:devices" | stats dc(id) as "Total Devices"</query>
+          <query>`canary_tools_index` sourcetype="canarytools:devices" live=true | stats dc(id) as "Live Devices"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -67,10 +67,10 @@
       </single>
     </panel>
     <panel>
-      <title>Total Canary Tokens</title>
+      <title>Offline Canaries</title>
       <single>
         <search>
-          <query>`canary_tools_index` sourcetype="canarytools:tokens" | stats dc(canarytoken) as "Total Canary Tokens"</query>
+          <query>`canary_tools_index` sourcetype="canarytools:devices" live=false | stats dc(id) as "Offline Devices"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -94,13 +94,24 @@
         <option name="useThousandSeparators">1</option>
       </single>
     </panel>
+    <panel>
+      <title>Live Canarytokens</title>
+      <single>
+        <search>
+          <query>`canary_tools_index` sourcetype="canarytools:tokens" enabled=true | stats dc(canarytoken) as "Live Canary Tokens"</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
   </row>
   <row>
     <panel>
-      <title>Incidents By Country</title>
+      <title>Canarytoken Incidents By Country</title>
       <map>
         <search>
-          <query>`canary_tools_index` sourcetype="canarytools:incidents" src=* | stats values(src) as src by id | iplocation src | geostats count by Country</query>
+          <query>`canary_tools_index` sourcetype="canarytools:incidents" src=* summary=Canarytoken* | stats values(src) as src by id | iplocation src | geostats count by Country</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -128,6 +139,7 @@
         <option name="mapping.tileLayer.tileOpacity">1</option>
         <option name="mapping.tileLayer.url">https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png</option>
         <option name="mapping.type">marker</option>
+        <option name="refresh.display">progressbar</option>
         <option name="trellis.enabled">0</option>
         <option name="trellis.scales.shared">1</option>
         <option name="trellis.size">medium</option>

@@ -13,7 +13,7 @@ modtime = 1521755476.280015000
 [views/canary_overview]
 owner = admin
 version = 7.0.0
-modtime = 1521713877.719007000
+modtime = 1522380250.879318000
 
 [views/troubleshooting]
 owner = admin
@@ -23,4 +23,9 @@ modtime = 1521236598.120613000
 [views/incident_investigator]
 owner = admin
 version = 7.0.0
-modtime = 1521755414.679769000
+modtime = 1522445566.002278000
+
+[views/close_incident]
+owner = admin
+version = 7.0.0
+modtime = 1522383262.692080000
