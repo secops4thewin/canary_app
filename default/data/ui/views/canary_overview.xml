@@ -31,11 +31,11 @@
         <p>
           <b>Overview</b>
         </p>
-      <p>This page provides you an overview of your canary data.  Keep in mind that page most often be blank.  Don't be alarmed :).  The communication to the Canary API is set so that only incidents, tokens or devices that have had a change in status will appear. For example, if a incident moves from unacknowledged to acknowledged it will appear in the data.  If a device comes online or goes offline it will appear.  Enjoy</p>
+      <p>This page provides you an overview of your canary data.  The communication to the Canary API is configured by two inputs.  One is a daily poll to grab all unacknowledged incidents, all devices and all tokens.  The second api call is set so that only incidents, tokens or devices that have had a change in status will be indexed. For example, if a incident moves from unacknowledged to acknowledged it will appear in the data or if a device comes online or goes offline it will appear.  Enjoy</p>
       <p>
           <b>Setup</b>
         </p>
-      <p>If you haven't clicked on the setup dashboard you should do that ;).</p>
+      <p>If you haven't clicked on the Inputs and Configuration tabs inside of the Thinkst Canary AddOn for Splunk you should do that ;).</p>
     </html>
     </panel>
   </row>

@@ -61,7 +61,33 @@
         </condition>
       </change>
     </input>
+    <input type="radio" token="showGuidance" searchWhenChanged="true">
+      <label>Show Guidance</label>
+      <choice value="true">On</choice>
+      <choice value="false">Off</choice>
+      <default>true</default>
+      <initialValue>true</initialValue>
+      <change>
+        <condition value="true">
+          <set token="showDescription">true</set>
+        </condition>
+        <condition>
+          <unset token="showDescription"></unset>
+        </condition>
+      </change>
+    </input>
   </fieldset>
+  <row depends="$showDescription$">
+    <panel>
+      <title>Description</title>
+      <html>
+        <p>
+          <b>Incident Investigator</b>
+        </p>
+      <p>This page provides you details as they relate to Canary Incidents.  Any incident can be selected and reviewed.  Panels will by dynamically shown depending on whether there is data to support it.  From this dashboard you can also close incidents down the bottom.  If you click on any field within the event details it will perform a search within your canary index  to promote interrogation and incident investigation.  Enjoy!</p>
+    </html>
+    </panel>
+  </row>
   <row>
     <panel depends="$showIncidentName$">
       <title>Incident Name</title>
@@ -175,6 +201,16 @@
       <table>
         <search base="baseSearch">
           <query>rename values(description.events{}.*) as * | rename values(description.* as * | rename "*)" as *| fields - values(* | transpose|rename column as "Event Data", "row 1" as "Values"</query>
+          <progress>
+            <condition match="$job.resultCount$ &gt; 0">
+              <set token="fill2">true</set>
+              <unset token="result2"></unset>
+            </condition>
+            <condition>
+              <set token="result2">true</set>
+              <unset token="fill2"></unset>
+            </condition>
+          </progress>
         </search>
         <option name="count">100</option>
         <option name="drilldown">cell</option>
