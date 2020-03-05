@@ -5,7 +5,7 @@
     "id": {
       "group": null, 
       "name": "canary_app", 
-      "version": "1.2.2"
+      "version": "1.2.3"
     }, 
     "author": [
       {
@@ -16,6 +16,11 @@
       {
         "name": "Marco Slaviero", 
         "email": "marco@thinkst.com", 
+        "company": "Thinkst Applied Research"
+      },
+      {
+        "name": "Quinton Machin", 
+        "email": "quinton@thinkst.com", 
         "company": "Thinkst Applied Research"
       }
     ], 
