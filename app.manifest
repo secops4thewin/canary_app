@@ -1,53 +1,53 @@
 {
-  "schemaVersion": "2.0.0", 
+  "schemaVersion": "2.0.0",
   "info": {
-    "title": "Thinkst Canary App for Splunk", 
+    "title": "Thinkst Canary App for Splunk",
     "id": {
-      "group": null, 
-      "name": "canary_app", 
-      "version": "1.2.3"
-    }, 
+      "group": null,
+      "name": "canary_app",
+      "version": "1.2.4"
+    },
     "author": [
       {
-        "name": "Mickey Perre", 
-        "email": null, 
+        "name": "Mickey Perre",
+        "email": null,
         "company": "Splunk"
-      }, 
+      },
       {
-        "name": "Marco Slaviero", 
-        "email": "marco@thinkst.com", 
+        "name": "Marco Slaviero",
+        "email": "marco@thinkst.com",
         "company": "Thinkst Applied Research"
       },
       {
-        "name": "Quinton Machin", 
-        "email": "quinton@thinkst.com", 
+        "name": "Quinton Machin",
+        "email": "quinton@thinkst.com",
         "company": "Thinkst Applied Research"
       }
-    ], 
-    "releaseDate": null, 
-    "description": "This app provides the visualisations for Canary Tools Addon For Splunk", 
+    ],
+    "releaseDate": null,
+    "description": "This app provides the visualisations for Canary Tools Addon For Splunk",
     "classification": {
-      "intendedAudience": null, 
-      "categories": [], 
+      "intendedAudience": null,
+      "categories": [],
       "developmentStatus": null
-    }, 
-    "commonInformationModels": null, 
+    },
+    "commonInformationModels": null,
     "license": {
-      "name": null, 
-      "text": null, 
+      "name": null,
+      "text": null,
       "uri": null
-    }, 
+    },
     "privacyPolicy": {
-      "name": null, 
-      "text": null, 
+      "name": null,
+      "text": null,
       "uri": null
-    }, 
+    },
     "releaseNotes": {
-      "name": null, 
-      "text": "./README.md", 
+      "name": null,
+      "text": "./README.md",
       "uri": null
     }
-  }, 
+  },
   "dependencies": {
     "TA-canary": {
       "version": ">=1.1.0"
@@ -57,14 +57,14 @@
     }
 
   },
-  "tasks": null, 
-  "inputGroups": null, 
-  "incompatibleApps": null, 
-  "platformRequirements": null, 
+  "tasks": null,
+  "inputGroups": null,
+  "incompatibleApps": null,
+  "platformRequirements": null,
   "supportedDeployments": [
-    "_standalone", 
+    "_standalone",
     "_distributed"
-  ], 
+  ],
   "targetWorkloads": null
 }
 # The following sections can be customized and added to the manifest. For detailed information,

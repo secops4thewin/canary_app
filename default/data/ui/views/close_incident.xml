@@ -16,7 +16,7 @@
     <panel>
       <table>
         <search>
-          <query>| makeresults count=1 | eval id=$incident_id$| sendalert canary_acknowledge_incident param.incident_id=$incident_id$ param.index_name="main"</query>
+          <query>| makeresults count=1 | eval id="$incident_id$"| sendalert canary_acknowledge_incident param.incident_id="$incident_id$" param.index_name="main"</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
