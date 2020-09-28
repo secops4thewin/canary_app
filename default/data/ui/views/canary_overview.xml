@@ -1,6 +1,6 @@
-<form>
+<form refresh="300"> 
   <label>Canary Overview</label>
-  <fieldset submitButton="true">
+  <fieldset submitButton="true" autoRun="true">
     <input type="time" token="field1">
       <label></label>
       <default>
@@ -44,7 +44,7 @@
       <title>Unacknowledged Incidents</title>
       <single>
         <search>
-          <query>`canary_tools_index` sourcetype="canarytools:incidents" "description.acknowledged"=False | stats dc(id) as "Unacknowledged Incidents"</query>
+          <query>sourcetype="canarytools:incidents"| eval temp=split(id,":") | eval hash_id=mvindex(temp,2) | table hash_id id description.acknowledged | dedup hash_id | search description.acknowledged=False | stats dc(id) as "Unacknowledged Incidents"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -57,7 +57,7 @@
       <title>Live Canaries</title>
       <single>
         <search>
-          <query>`canary_tools_index` sourcetype="canarytools:devices" live=true | stats dc(id) as "Live Devices"</query>
+          <query>`canary_tools_index` sourcetype="canarytools:devices" | table id, live | dedup id | search live=true | stats count dc(id) as "Live Devices" | fields "Live Devices"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -70,7 +70,7 @@
       <title>Offline Canaries</title>
       <single>
         <search>
-          <query>`canary_tools_index` sourcetype="canarytools:devices" live=false | stats dc(id) as "Offline Devices"</query>
+          <query>`canary_tools_index` sourcetype="canarytools:devices" | table id, live | dedup id | search live=false | stats count dc(id) as "Offline Devices" | fields "Offline Devices"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -98,7 +98,7 @@
       <title>Live Canarytokens</title>
       <single>
         <search>
-          <query>`canary_tools_index` sourcetype="canarytools:tokens" enabled=true | stats dc(canarytoken) as "Live Canary Tokens"</query>
+          <query>`canary_tools_index` sourcetype="canarytools:tokens" | table canarytoken enabled | dedup canarytoken | search enabled=true | stats count dc(canarytoken) as "Live Canarytokens" | fields "Live Canarytokens"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>

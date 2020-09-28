@@ -39,7 +39,7 @@
       <fieldForLabel>id</fieldForLabel>
       <fieldForValue>id</fieldForValue>
       <search>
-        <query>`canary_tools_index` sourcetype="canarytools:incidents"  | stats values(id) as id| mvexpand id</query>
+        <query>sourcetype="canarytools:incidents" | stats values(id) as id| mvexpand id | eval temp=split(id,":") | eval hash_id=mvindex(temp,2) | eval epoch=mvindex(temp,4) | table Key hash_id id epoch | dedup hash_id | fields id</query>
         <earliest>-30d@d</earliest>
         <latest>now</latest>
       </search>
