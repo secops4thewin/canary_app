@@ -1,10 +1,5 @@
-# canary_app
+# Deprecated
 
-The Thinkst Canary App for Splunk provides visualization dashboards to interact with Thinkst Canary incidents, devices and Canarytokens. Using the dashboard a user can investigate incidents, track device status and map Canarytoken incidents. Support is provided via the regular Canary support channels.
+This software is no longer supported and the repo remains for archival purposes only.
 
-# Dependencies
-
-This app requires the Thinkst Canary Add-on for Splunk available at https://apps.splunk.com/apps/id/TA-canary
-
-# Credits
-Written by Mickey Perre, maintained by Thinkst. Kindly file issues with the app here in Github.
+A new add-on is available at https://splunkbase.splunk.com/app/6196/
